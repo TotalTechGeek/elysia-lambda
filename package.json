@@ -2,7 +2,11 @@
   "name": "elysia-lambda",
   "author": "Jesse Daniel Mitchell",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "repository": {
+    "type": "https+git",
+    "url": "https://github.com/TotalTechGeek/elysia-lambda"
+  },
   "description": "A plugin for Elysia to deploy to AWS Lambda",
   "module": "index.ts",
   "type": "module",
