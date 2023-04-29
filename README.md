@@ -80,6 +80,10 @@ bun run deploy
 
 This will build your application and deploy it to AWS Lambda.
 
+### Demo
+
+https://user-images.githubusercontent.com/2261916/235324906-17f1fdcf-d61a-487e-b498-595e7f94c836.mp4
+ 
 ### Notes 
 
 This plugin only works with the `0.6.0` Canary Bundler. 
