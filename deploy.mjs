@@ -25,7 +25,7 @@ program
     .option('-c , --config <config>', 'Path to a yaml/json config file.')
     .option('--description <desc>', 'Description of the lambda.')
     .option('--memory <MiB>', 'Memory to allocate to the lambda, in MiB.', '128')
-    .addOption(new Option('--arch <architecture>', 'AWS architecture to deploy to.',).choices(['arm64', 'x64']))
+    .addOption(new Option('--arch <architecture>', 'AWS architecture to deploy to.',).choices(['arm64', 'x86_64']))
     
 program.parse(process.argv)
 
@@ -94,7 +94,7 @@ if (options.init) {
     
         execSync('git clone https://github.com/oven-sh/bun')
         
-        const output = execSync(`cd bun/packages/bun-lambda && bun install && bun run publish-layer --arch ${architecture === 'x64' ? 'x64' : 'aarch64'} --region ${region} --release ${bunVersion}`)
+        const output = execSync(`cd bun/packages/bun-lambda && bun install && bun run publish-layer --arch ${architecture === 'x86_64' ? 'x64' : 'aarch64'} --region ${region} --release ${bunVersion}`)
         
         // use a regex to get the arn of the layer, starts with "arn:aws:lambda:" all the way to the next whitespace character
         layer = output.toString().replace(/\r?\n/g, ' ').match(/arn:aws:lambda:[^\s]+/)[0]
@@ -233,6 +233,7 @@ if (options.deploy) {
     if (!options.layers) err += '- Must specify at least one layer for the lambda with --layers when using --deploy.\n'
     if (typeof options.layers === 'string') options.layers = [options.layers]
     if (!options.arch) err += '- Must specify --arch for the lambda when using --deploy.\n'
+    if (options.arch === 'x64') options.arch = 'x86_64' // minor correction from previous configs.
     if (err) {
         console.error(chalk.red(`Some deployment issues were encountered:\n${err}`))
         process.exit(1)
