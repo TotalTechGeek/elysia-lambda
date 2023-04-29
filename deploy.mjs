@@ -307,26 +307,24 @@ async function deploy () {
     }
     else {
         console.log(chalk.magenta(`Lambda "${options.name}" found. Updating.`))
-        await Promise.all([
-            lambda.updateFunctionCode({
-                FunctionName: options.name,
-                ZipFile: fs.readFileSync(`bundle.${now}.zip`),
+        await lambda.updateFunctionCode({
+            FunctionName: options.name,
+            ZipFile: fs.readFileSync(`bundle.${now}.zip`),
+        })
+        await lambda.updateFunctionConfiguration({
+            FunctionName: options.name,
+            Layers: options.layers,
+            Description: options.description || 'Elysia Lambda',
+            Role: options.role,
+            Architectures: [options.arch],
+            Handler: 'index.js',
+            ...(options.environment && {
+                Environment: {
+                    Variables: options.environment
+                }
             }),
-            lambda.updateFunctionConfiguration({
-                FunctionName: options.name,
-                Layers: options.layers,
-                Description: options.description || 'Elysia Lambda',
-                Role: options.role,
-                Architectures: [options.arch],
-                Handler: 'index.js',
-                ...(options.environment && {
-                    Environment: {
-                        Variables: options.environment
-                    }
-                }),
-                MemorySize: +options.memory || 128,
-            })
-        ])
+            MemorySize: +options.memory || 128,
+        })
         console.log(logSymbols.success, chalk.green('Updated!'))
     }
 
