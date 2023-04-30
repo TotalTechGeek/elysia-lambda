@@ -11,6 +11,7 @@ import { Option, program } from 'commander'
 import inquirer from 'inquirer'
 import chalk from 'chalk'
 import { parse, stringify } from 'yaml'
+import equal from 'deep-equal'
 import logSymbols from './logSymbols.mjs'
 
 program
@@ -50,8 +51,8 @@ if (options.init) {
         type: 'list',
         name: 'architecture',
         message: 'What architecture do you want to deploy to?',
-        choices: ['arm64', 'x64'],
-        default: 'x64'
+        choices: ['arm64', 'x86_64'],
+        default: 'x86_64'
     })
 
     // Yes / No; have you created the bun layer yet?
@@ -270,11 +271,24 @@ const zip = new AdmZip()
 zip.addLocalFile(bundleFile, '', 'index.js')
 fs.unlinkSync(bundleFile)
 
+const timeout = async (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
+const sizes = ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi', 'Yi']
+
 /**
  * Performs the deployment to AWS.
  */
 async function deploy () {
     zip.writeZip(`bundle.${now}.zip`)
+
+    // Get size of zip
+    const stats = fs.statSync(`bundle.${now}.zip`)
+    let size = stats.size
+    let div = 0
+    while (size > 1024) {
+        size /= 1024
+        div++
+    }
 
     const lambda = new AWS.Lambda({ region: 'us-east-1' })
 
@@ -303,31 +317,59 @@ async function deploy () {
             }),
             MemorySize: +options.memory || 128,
         })
-        console.log(logSymbols.success, chalk.green('Deployed!'))
     }
     else {
-        console.log(chalk.magenta(`Lambda "${options.name}" found. Updating.`))
-        await lambda.updateFunctionCode({
+        console.log(chalk.magenta(`Lambda "${options.name}" found. Updating code.`))
+
+        const result = await lambda.updateFunctionCode({
             FunctionName: options.name,
             ZipFile: fs.readFileSync(`bundle.${now}.zip`),
         })
-        await lambda.updateFunctionConfiguration({
-            FunctionName: options.name,
-            Layers: options.layers,
-            Description: options.description || 'Elysia Lambda',
-            Role: options.role,
+
+        // check if anything is different 
+        if (!equal({
             Architectures: [options.arch],
             Handler: 'index.js',
+            Role: options.role,
+            MemorySize: +options.memory || 128,
+            Layers: options.layers,
             ...(options.environment && {
                 Environment: {
                     Variables: options.environment
                 }
-            }),
-            MemorySize: +options.memory || 128,
-        })
-        console.log(logSymbols.success, chalk.green('Updated!'))
+            })
+        }, {
+            Architectures: result.Architectures,
+            Handler: result.Handler,
+            Role: result.Role,
+            MemorySize: result.MemorySize,
+            Layers: result.Layers.map(i => i.Arn),
+            ...(result.Environment && {Environment: result.Environment}),
+        })) {
+            console.log(chalk.magenta(`Changes detected. Updating configuration.`))
+
+            // I tried to use AWS.waitUntilFunctionUpdatedV2, but it would pause indefinitely.
+            await timeout(2000)
+
+            await lambda.updateFunctionConfiguration({
+                FunctionName: options.name,
+                Layers: options.layers,
+                Description: options.description || 'Elysia Lambda',
+                Role: options.role,
+                Architectures: [options.arch],
+                Handler: 'index.js',
+                ...(options.environment && {
+                    Environment: {
+                        Variables: options.environment
+                    }
+                }),
+                MemorySize: +options.memory || 128,
+            })
+        }
     }
 
+    console.log(chalk.magenta('Bundle Size: ', chalk.yellow(size.toFixed(2) + sizes[div] + 'B')))
+    console.log(logSymbols.success, chalk.green('Success!'))
     fs.unlinkSync(`bundle.${now}.zip`)
 }
 
