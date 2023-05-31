@@ -2,7 +2,7 @@
   "name": "elysia-lambda",
   "author": "Jesse Daniel Mitchell",
   "license": "MIT",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "repository": {
     "type": "https+git",
     "url": "https://github.com/TotalTechGeek/elysia-lambda"

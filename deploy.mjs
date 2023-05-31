@@ -262,7 +262,7 @@ fs.writeFileSync(out, script)
 
 
 const bundleFile = path.resolve(process.cwd(), 'bundle.' + now + '.js')
-execSync(`bun build ${out} --platform=bun --minify --outfile=${bundleFile} --external @elysiajs/fn`)
+execSync(`bun build --minify --outfile=${bundleFile} --external @elysiajs/fn --target=bun ${out}`)
 
 fs.unlinkSync(out)
 fs.unlinkSync(mutatedFile)

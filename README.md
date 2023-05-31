@@ -86,6 +86,6 @@ https://user-images.githubusercontent.com/2261916/235324906-17f1fdcf-d61a-487e-b
  
 ### Notes 
 
-This plugin only works with the `0.6.0` Canary Bundler. 
+The deployment script requires Bun versions newer than `0.6.0`.
 
 I may add support for ESBuild & the Elysia Node.js Polyfills in the future.
