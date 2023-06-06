@@ -253,7 +253,7 @@ const script = `
 import { instance } from 'elysia-lambda'
 import '${mutatedFile}' // the entry point import
 export default {
-  js: instance().innerHandle
+  js: instance().innerHandle || instance().fetch
 }`
 
 
