@@ -290,7 +290,7 @@ async function deploy () {
         div++
     }
 
-    const lambda = new AWS.Lambda({ region: 'us-east-1' })
+    const lambda = new AWS.Lambda({ region: options.region || 'us-east-1' })
 
     // check if lambda exists
     const exists = await lambda.getFunction({
