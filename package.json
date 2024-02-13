@@ -12,18 +12,18 @@
   "type": "module",
   "devDependencies": {},
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.322.0",
+    "@aws-sdk/client-lambda": "^3.511.0",
     "adm-zip": "^0.5.10",
-    "chalk": "^5.2.0",
-    "commander": "^10.0.1",
-    "deep-equal": "^2.2.1",
-    "elysia": "^0.4.13",
-    "inquirer": "^9.2.0",
-    "superagent": "^8.0.9",
-    "yaml": "^2.2.2"
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "deep-equal": "^2.2.3",
+    "elysia": "^0.8.17",
+    "inquirer": "^9.2.14",
+    "superagent": "^8.1.2",
+    "yaml": "^2.3.4"
   },
   "bin": {
     "elysia-lambda": "./deploy.mjs"
